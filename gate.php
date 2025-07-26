@@ -2,7 +2,7 @@
 $listas = [];
 
 // Collect lista1 to lista10 from GET
-for ($i = 1; $i <= 10; $i++) {
+for ($i = 1; $i <= 5; $i++) {
     if (!isset($_GET["lista$i"])) continue;
     $listas[$i] = trim($_GET["lista$i"]);
 }
