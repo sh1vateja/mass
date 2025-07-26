@@ -1,13 +1,13 @@
 <?php
 $listas = [];
 
-// Collect lista1 to lista5 from GET
-for ($i = 1; $i <= 5; $i++) {
+// Collect lista1 to lista10 from GET
+for ($i = 1; $i <= 10; $i++) {
     if (!isset($_GET["lista$i"])) continue;
     $listas[$i] = trim($_GET["lista$i"]);
 }
 
-if (empty($listas)) exit("No lista1-5 provided.");
+if (empty($listas)) exit("No lista1-10 provided.");
 
 $multiHandle = curl_multi_init();
 $curlHandles = [];
@@ -78,3 +78,4 @@ foreach ($curlHandles as $i => $ch) {
 
 curl_multi_close($multiHandle);
 ?>
+
